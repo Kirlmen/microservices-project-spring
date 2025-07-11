@@ -1,0 +1,11 @@
+build:
+  version: "2.0"
+
+cards:
+  message: "Welcome to the EazyBank cards-prod APIs"
+  contactDetails:
+    name: " Rajesh Koothropali - Programmer"
+    email: "rk@eazybank.com"
+  onCallSupport:
+    - (511)111-15-15
+    - (115)222-51-51

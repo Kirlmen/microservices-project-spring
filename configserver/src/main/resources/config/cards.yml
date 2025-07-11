@@ -1,0 +1,11 @@
+build:
+  version: "3.0"
+
+cards:
+  message: "Welcome to the EazyBank cards APIs"
+  contactDetails:
+    name: " John Doe - Cards Programmer"
+    email: "jd@eazybank.com"
+  onCallSupport:
+    - (555)555-55-55
+    - (555)444-44-44

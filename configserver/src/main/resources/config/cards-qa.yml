@@ -1,0 +1,11 @@
+build:
+  version: "1.0"
+
+cards:
+  message: "Welcome to the EazyBank cards-qa APIs"
+  contactDetails:
+    name: " Bill Gates - QA Programmer"
+    email: "bg@eazybank.com"
+  onCallSupport:
+    - (321)123-32-12
+    - (123)321-23-21
