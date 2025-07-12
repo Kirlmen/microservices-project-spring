@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -32,8 +34,8 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 public class LoansController {
 
+	private static final Logger logger = LoggerFactory.getLogger(LoansController.class);
 	private final ILoansService iLoansService;
-
 	@Value("${build.version}")
 	private String buildVersion;
 
@@ -65,22 +67,64 @@ public class LoansController {
 	})
 	@PostMapping("/create")
 	public ResponseEntity<ResponseDto> createLoans(@RequestParam
-	                                              @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
-	                                              String mobileNumber) {
+	                                               @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+	                                               String mobileNumber) {
 		iLoansService.createLoan(mobileNumber);
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
 				.body(new ResponseDto(LoansConstants.STATUS_201, LoansConstants.MESSAGE_201));
 	}
 
+	@Operation(
+			summary = "Fetch Loan Details REST API",
+			description = "REST API to fetch loan details based on a mobile number"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "HTTP Status OK"
+			),
+			@ApiResponse(
+					responseCode = "500",
+					description = "HTTP Status Internal Server Error",
+					content = @Content(
+							schema = @Schema(implementation = ErrorResponseDto.class)
+					)
+			)
+	}
+	)
 	@GetMapping("/fetch")
-	public ResponseEntity<LoansDto> fetchLoans(@RequestParam
-	                                          @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
-	                                          String mobileNumber) {
+	public ResponseEntity<LoansDto> fetchLoans(@RequestHeader("eazybank-correlation-id") String correlationId,
+	                                           @RequestParam
+	                                           @Pattern(regexp = "(^$|[0-9]{10})", message = "mobileNumber must be 10 digits")
+	                                           String mobileNumber) {
+		logger.debug("eazybank-correlation-id found: {}", correlationId);
 		LoansDto loansDto = iLoansService.fetchLoans(mobileNumber);
 		return ResponseEntity.status(HttpStatus.OK).body(loansDto);
 	}
 
+	@Operation(
+			summary = "Update Loan Details REST API",
+			description = "REST API to update loan details based on a loan number"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "HTTP Status OK"
+			),
+			@ApiResponse(
+					responseCode = "417",
+					description = "Expectation Failed"
+			),
+			@ApiResponse(
+					responseCode = "500",
+					description = "HTTP Status Internal Server Error",
+					content = @Content(
+							schema = @Schema(implementation = ErrorResponseDto.class)
+					)
+			)
+	}
+	)
 	@PutMapping("/update")
 	public ResponseEntity<ResponseDto> updateLoans(@Valid @RequestBody LoansDto loansDto) {
 		boolean condition = iLoansService.updateLoans(loansDto);
@@ -97,8 +141,8 @@ public class LoansController {
 
 	@DeleteMapping("/delete")
 	public ResponseEntity<ResponseDto> deleteLoans(@RequestParam
-	                                              @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
-	                                              String mobileNumber) {
+	                                               @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+	                                               String mobileNumber) {
 		boolean condition = iLoansService.deleteLoans(mobileNumber);
 		if (condition) {
 			return ResponseEntity
